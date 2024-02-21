@@ -13,6 +13,6 @@ namespace FrontalMVC.Models.EF
         public int IDEquipe { get; set; }
 
         [ForeignKey("IDEquipe")]
-        public Equipe Equipe { get; set; }
+        public Equipe? Equipe { get; set; }
     }
 }

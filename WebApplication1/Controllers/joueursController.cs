@@ -6,83 +6,69 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using FrontalMVC.Models.EF;
-using Microsoft.AspNetCore.OutputCaching;
 
 namespace FrontalMVC.Controllers
 {
-    public class EquipesController : Controller
+    public class joueursController : Controller
     {
         private readonly TeamContext _context;
 
-        public PartialViewResult TrouverEquipeLeader()
-        {
-            var leader = _context.Equipes.OrderByDescending(m => m.MaxMembres).First();
-
-            return PartialView("_FicheEquipe", leader);
-        }
-
-        public EquipesController(TeamContext context)
+        public joueursController(TeamContext context)
         {
             _context = context;
         }
 
-        // GET: Equipes
-        [OutputCache(Duration=30)]
+        // GET: joueurs
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Equipes.ToListAsync());
+            var teamContext = _context.Joueurs.Include(j => j.Equipe);
+            return View(await teamContext.ToListAsync());
         }
 
-        // GET: Equipes/Details/5
+        // GET: joueurs/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            var  dtHorodatage = DateTime.Now.ToLongTimeString();
-
-            string strHorodatage = $"Détails demandés à {dtHorodatage}";
-
-            //transfert de la chaîne strHorodatage vers la vue
-            //ViewData["Horodatage"] = strHorodatage;
-            ViewBag.horo = dtHorodatage;
-
-
             if (id == null)
             {
                 return NotFound();
             }
 
-            var equipe = await _context.Equipes.Include("Joueurs")
+            var joueur = await _context.Joueurs
+                .Include(j => j.Equipe)
                 .FirstOrDefaultAsync(m => m.ID == id);
-            if (equipe == null)
+            if (joueur == null)
             {
                 return NotFound();
             }
 
-            return View(equipe);
+            return View(joueur);
         }
 
-        // GET: Equipes/Create
+        // GET: joueurs/Create
         public IActionResult Create()
         {
+            ViewData["IDEquipe"] = new SelectList(_context.Equipes, "ID", "ID");
             return View();
         }
 
-        // POST: Equipes/Create
+        // POST: joueurs/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ID,Nom,MaxMembres")] Equipe equipe)
+        public async Task<IActionResult> Create([Bind("ID,Nom,Prenom,IDEquipe")] joueur joueur)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(equipe);
+                _context.Add(joueur);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(equipe);
+            ViewData["IDEquipe"] = new SelectList(_context.Equipes, "ID", "ID", joueur.IDEquipe);
+            return View(joueur);
         }
 
-        // GET: Equipes/Edit/5
+        // GET: joueurs/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -90,22 +76,23 @@ namespace FrontalMVC.Controllers
                 return NotFound();
             }
 
-            var equipe = await _context.Equipes.FindAsync(id);
-            if (equipe == null)
+            var joueur = await _context.Joueurs.FindAsync(id);
+            if (joueur == null)
             {
                 return NotFound();
             }
-            return View(equipe);
+            ViewData["IDEquipe"] = new SelectList(_context.Equipes, "ID", "ID", joueur.IDEquipe);
+            return View(joueur);
         }
 
-        // POST: Equipes/Edit/5
+        // POST: joueurs/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ID,Nom,MaxMembres")] Equipe equipe)
+        public async Task<IActionResult> Edit(int id, [Bind("ID,Nom,Prenom,IDEquipe")] joueur joueur)
         {
-            if (id != equipe.ID)
+            if (id != joueur.ID)
             {
                 return NotFound();
             }
@@ -114,12 +101,12 @@ namespace FrontalMVC.Controllers
             {
                 try
                 {
-                    _context.Update(equipe);
+                    _context.Update(joueur);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!EquipeExists(equipe.ID))
+                    if (!joueurExists(joueur.ID))
                     {
                         return NotFound();
                     }
@@ -130,10 +117,11 @@ namespace FrontalMVC.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(equipe);
+            ViewData["IDEquipe"] = new SelectList(_context.Equipes, "ID", "ID", joueur.IDEquipe);
+            return View(joueur);
         }
 
-        // GET: Equipes/Delete/5
+        // GET: joueurs/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -141,34 +129,35 @@ namespace FrontalMVC.Controllers
                 return NotFound();
             }
 
-            var equipe = await _context.Equipes
+            var joueur = await _context.Joueurs
+                .Include(j => j.Equipe)
                 .FirstOrDefaultAsync(m => m.ID == id);
-            if (equipe == null)
+            if (joueur == null)
             {
                 return NotFound();
             }
 
-            return View(equipe);
+            return View(joueur);
         }
 
-        // POST: Equipes/Delete/5
+        // POST: joueurs/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var equipe = await _context.Equipes.FindAsync(id);
-            if (equipe != null)
+            var joueur = await _context.Joueurs.FindAsync(id);
+            if (joueur != null)
             {
-                _context.Equipes.Remove(equipe);
+                _context.Joueurs.Remove(joueur);
             }
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool EquipeExists(int id)
+        private bool joueurExists(int id)
         {
-            return _context.Equipes.Any(e => e.ID == id);
+            return _context.Joueurs.Any(e => e.ID == id);
         }
     }
 }

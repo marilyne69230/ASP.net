@@ -24,6 +24,11 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.Requ
     .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddControllersWithViews();
 
+builder.Services.AddOutputCache(options =>
+{
+    options.AddBasePolicy(builder => builder.Cache());
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -45,9 +50,15 @@ app.UseRouting();
 
 app.UseAuthorization();
 
+app.MapControllerRoute(name: "Directe", pattern: "Team/{id:int?}", defaults: new { controller = "Equipes", Action="Details" });
+
+app.MapControllerRoute(name: "Directe", pattern: "Team/{action}/{id?}", defaults: new { controller = "Equipes" });
+
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
-app.MapRazorPages();
+    pattern: "{Controller=Home}/{action=Index}/{id?}");
 
+app.UseOutputCache();
+
+app.MapRazorPages();
 app.Run();

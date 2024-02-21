@@ -1,4 +1,5 @@
-﻿@model string
+﻿@using FrontalMVC.Composants
+@model string
 @{
     ViewData["Title"] = "Home Page";
 }
@@ -6,4 +7,9 @@
 <div class="text-center">
     <h1 class="display-4">Welcome</h1>
     <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">@Model </a>.</p>
+</div>
+<div>
+    <h2>Equipe détentrice du record de membres !</h2>
+    @await Component.InvokeAsync("ComposantFiche")
+
 </div>

@@ -1,4 +1,4 @@
-﻿@model IEnumerable<FrontalMVC.Models.EF.Equipe>
+﻿@model IEnumerable<FrontalMVC.Models.EF.joueur>
 
 @{
     ViewData["Title"] = "Index";
@@ -16,7 +16,10 @@
                 @Html.DisplayNameFor(model => model.Nom)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.MaxMembres)
+                @Html.DisplayNameFor(model => model.Prenom)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Equipe)
             </th>
             <th></th>
         </tr>
@@ -28,12 +31,14 @@
                 @Html.DisplayFor(modelItem => item.Nom)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.MaxMembres)
+                @Html.DisplayFor(modelItem => item.Prenom)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Equipe.ID)
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.ID">Edit</a> |
-@*                 @Html.ActionLink("Edition", "Edit", new {ID=item.ID}) => équivalent ligne du haut
- *@                <a asp-action="Details" asp-route-id="@item.ID">Details</a> |
+                <a asp-action="Details" asp-route-id="@item.ID">Details</a> |
                 <a asp-action="Delete" asp-route-id="@item.ID">Delete</a>
             </td>
         </tr>
